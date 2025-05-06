@@ -9,7 +9,7 @@ echo ""
 
 
 ###  CONFIG – edit BASE_DIR to point at your repo folder     
-BASE_DIR="/Users/tristankindle/dev/repo"
+BASE_DIR="/path/to/repo"
 
 ###  Discover repositories                                   
 EXCLUDE_REPOS=("")                  # names to skip, e.g. ("dotfiles" "sandbox")
@@ -26,7 +26,7 @@ done
 
 echo "Found the following Git repositories under $BASE_DIR:"
 for repo in "${REPOS[@]}"; do
-    echo "  • $repo"
+    echo "⤷ $repo"
 done
 echo ""
 
@@ -60,7 +60,7 @@ for repo in "${REPOS[@]}"; do
     git for-each-ref --format='%(refname:short)' refs/heads | while read -r branch; do
         remote_ref="origin/$branch"
         if ! git show-ref --quiet "refs/remotes/$remote_ref"; then
-            echo "   ℹ️ $branch → no remote twin (skipped)"
+            echo "   ℹ️  $branch → no remote twin (skipped)"
             continue
         fi
 
@@ -68,12 +68,12 @@ for repo in "${REPOS[@]}"; do
         remote_sha=$(git rev-parse "$remote_ref")
 
         if [ "$local_sha" = "$remote_sha" ]; then
-            echo "   ℹ️ $branch is up-to-date"
+            echo "   ✅ $branch is up-to-date"
         elif git merge-base --is-ancestor "$branch" "$remote_ref"; then
             git update-ref "refs/heads/$branch" "$remote_sha"
             echo "   ✅ $branch fast-forwarded"
         else
-            echo "   ⚠️ $branch diverged (manual review needed)"
+            echo "   ⚠️  $branch diverged (manual review needed)"
         fi
     done
     cd "$BASE_DIR" || exit 1
