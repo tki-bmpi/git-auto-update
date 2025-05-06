@@ -1,6 +1,3 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
 echo ""
 echo "   _______ __     ___         __           __  __          __      __     "
 echo "  / ____(_) /_   /   | __  __/ /_____     / / / /___  ____/ /___ _/ /____ "
@@ -51,19 +48,19 @@ for repo in "${REPOS[@]}"; do
     cd "$REPO_PATH" || { echo "Cannot cd into $REPO_PATH"; continue; }
 
     ### 1. Fetch
-    echo "⏬  Fetching changes..."
+    echo "⏬ Fetching changes..."
     git fetch --prune
 
     ### 2. Delete local branches whose upstream is gone
-    echo "🧹  Deleting obsolete local branches..."
+    echo "🧹 Deleting obsolete local branches..."
     git branch -vv | awk '/: gone]/{print $1}' | xargs --no-run-if-empty git branch -D
 
     ### 3. Fast-forward branches strictly behind their remote
-    echo "⏩  Fast-forwarding local branches..."
+    echo "⏩ Fast-forwarding local branches..."
     git for-each-ref --format='%(refname:short)' refs/heads | while read -r branch; do
         remote_ref="origin/$branch"
         if ! git show-ref --quiet "refs/remotes/$remote_ref"; then
-            echo "   ✅    $branch → no remote twin (skipped)"
+            echo "   ℹ️ $branch → no remote twin (skipped)"
             continue
         fi
 
@@ -71,7 +68,7 @@ for repo in "${REPOS[@]}"; do
         remote_sha=$(git rev-parse "$remote_ref")
 
         if [ "$local_sha" = "$remote_sha" ]; then
-            echo "   ✅ $branch is up-to-date"
+            echo "   ℹ️ $branch is up-to-date"
         elif git merge-base --is-ancestor "$branch" "$remote_ref"; then
             git update-ref "refs/heads/$branch" "$remote_sha"
             echo "   ✅ $branch fast-forwarded"
